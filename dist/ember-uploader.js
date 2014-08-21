@@ -7,6 +7,7 @@ Ember.Uploader = Ember.Object.extend(Ember.Evented, {
   url: null,
   paramNamespace: null,
   paramName: 'file',
+  multiple: false,
 
   /**
    * ajax request type (method), by default it will be POST
@@ -30,8 +31,9 @@ Ember.Uploader = Ember.Object.extend(Ember.Evented, {
     });
   },
 
-  setupFormData: function(file, extra) {
+  setupFormData: function(files, extra) {
     var formData = new FormData();
+    var multiple = get(this, 'multiple');
 
     for (var prop in extra) {
       if (extra.hasOwnProperty(prop)) {
@@ -39,7 +41,13 @@ Ember.Uploader = Ember.Object.extend(Ember.Evented, {
       }
     }
 
-    formData.append(this.toNamespacedParam(this.paramName), file);
+    if (multiple){
+      for (var i = 0; i < files.length; i++) {
+        formData.append(this.toNamespacedParam(this.paramName) + '[]', files[i]);
+      }
+    } else {
+      formData.append(this.toNamespacedParam(this.paramName), files);
+    }
 
     return formData;
   },
